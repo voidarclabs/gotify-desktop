@@ -1,5 +1,5 @@
 {
-  description = "A simple Rust development environment";
+  description = "Gotify-desktop package and devshell";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
