@@ -23,6 +23,7 @@ Small [Gotify](https://gotify.net/) daemon to receive messages and forward them 
 ### From source
 
 You need a Rust build environment for example from [rustup](https://rustup.rs/).
+There is also a rust development environment provided in the flake, accessible using `nix devevlop`
 
 ```bash
 cargo build --release
@@ -48,6 +49,27 @@ sudo install -Dm 644 -t /usr/lib/systemd/user/ gotify-desktop.service
 ### From AUR
 
 Arch Linux users can install the [gotify-desktop AUR package](https://aur.archlinux.org/packages/gotify-desktop/).
+
+### Nix
+
+Add as an input:
+```nix
+# flake.nix
+{
+    inputs = {
+        gotify-desktop = "github:desbma/gotify-desktop";
+    };
+}
+```
+Then add to packages in order to install:
+```nix
+# configuration.nix
+{inputs, ...}: {
+    environment.systemPackages = [
+        inputs.gotify-desktop.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    ];
+}
+```
 
 ## Configuration
 
@@ -79,6 +101,8 @@ on_msg_command = "/usr/bin/beep"
 ## Usage
 
 Start `gotify-desktop` in the background using your favorite init system, desktop environment or windows manager.
+
+Use the `--config` flag to choose a custom location for the config.
 
 ## License
 
