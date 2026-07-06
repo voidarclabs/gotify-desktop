@@ -1,7 +1,8 @@
 //! Local configuration
 
 use std::{
-    fs,
+    env, fs,
+    path::PathBuf,
     process::{Command, Stdio},
 };
 
@@ -89,12 +90,16 @@ pub(crate) struct ActionConfig {
 }
 
 /// Parse local configuration
-pub(crate) fn parse() -> anyhow::Result<Config> {
+pub(crate) fn parse(custom_config: Option<String>) -> anyhow::Result<Config> {
     let binary_name = env!("CARGO_PKG_NAME");
     let xdg_dirs = xdg::BaseDirectories::with_prefix(binary_name);
-    let config_filepath = xdg_dirs
-        .find_config_file("config.toml")
-        .ok_or_else(|| anyhow::anyhow!("Unable to find config file"))?;
+    let config_filepath = if let Some(config) = custom_config {
+        PathBuf::from(config)
+    } else {
+        xdg_dirs
+            .find_config_file("config.toml")
+            .ok_or_else(|| anyhow::anyhow!("Unable to find config file"))?
+    };
     log::debug!("Config filepath: {config_filepath:?}");
 
     let toml_data = fs::read_to_string(config_filepath)?;

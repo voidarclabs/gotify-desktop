@@ -1,6 +1,6 @@
 //! Gotify desktop daemon
 
-use std::{cell::RefCell, process::Command, rc::Rc};
+use std::{cell::RefCell, env, process::Command, process::exit, rc::Rc};
 
 use anyhow::Context as _;
 
@@ -63,6 +63,22 @@ fn handle_message(
 
 /// Program entry point
 fn main() -> anyhow::Result<()> {
+    let mut args = env::args();
+    let bin = args.next().unwrap();
+
+    let mut custom_config: Option<String> = None;
+
+    while let Some(arg) = args.next() {
+        match arg.as_str() {
+            "--config" | "-c" => {
+                custom_config = args.next().or_else(|| {
+                    eprintln!("Have to provide config");
+                    exit(1);
+                })
+            }
+            _ => print_help_and_exit(&bin),
+        }
+    }
     // Init logger
     simple_logger::SimpleLogger::new()
         .with_level(if cfg!(debug_assertions) {
@@ -75,7 +91,7 @@ fn main() -> anyhow::Result<()> {
         .context("Failed to init logger")?;
 
     // Parse config
-    let cfg = config::parse().context("Failed to read config")?;
+    let cfg = config::parse(custom_config).context("Failed to read config")?;
     let token = cfg.gotify.token.fetch()?;
     let on_msg_command = match cfg.action.on_msg_command {
         None => None,
@@ -142,4 +158,20 @@ fn main() -> anyhow::Result<()> {
             .context("Failed to handle message")?;
         }
     }
+}
+
+fn print_help_and_exit(bin: &str) -> ! {
+    eprintln!(
+        "\
+{bin}  –  Small Gotify daemon to send messages as desktop notifications
+
+USAGE:
+    {bin} [OPTIONS]
+
+OPTIONS:
+    -c --config     Select config file to use. Default ~/.config/gotify-desktop/config.toml
+    -h --help       Display this menu and exit",
+        bin = bin
+    );
+    exit(0);
 }
