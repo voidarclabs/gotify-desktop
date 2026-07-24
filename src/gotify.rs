@@ -49,7 +49,7 @@ pub(crate) struct Client {
 }
 
 /// Gotify message
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, serde::Deserialize)]
 pub(crate) struct Message {
     /// Gotify id
     pub id: i64,
@@ -62,15 +62,13 @@ pub(crate) struct Message {
     pub title: String,
     /// Message priority
     pub priority: i64,
-    /// Message date & time
-    pub date: String,
     /// App image filepath
     #[serde(skip)]
     pub app_img_filepath: Option<PathBuf>,
 }
 
 /// Gotify message bunch
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(serde::Deserialize)]
 pub(crate) struct AllMessages {
     /// The actual messages
     messages: Vec<Message>,
