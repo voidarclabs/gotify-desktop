@@ -175,11 +175,10 @@ impl Client {
     }
 
     /// Add auth header to request, send it, check status code, and parse JSON response
-    fn send_api_request<T: serde::de::DeserializeOwned>(
-        &self,
-        method: ureq::http::Method,
-        url: &url::Url,
-    ) -> anyhow::Result<T> {
+    fn send_api_request<T>(&self, method: ureq::http::Method, url: &url::Url) -> anyhow::Result<T>
+    where
+        T: serde::de::DeserializeOwned,
+    {
         let json_data = String::from_utf8(self.send_request(method, url)?)?;
         log::trace!("{json_data}");
         Ok(serde_json::from_str(&json_data)?)
