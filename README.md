@@ -2,6 +2,7 @@
 
 [![Build status](https://github.com/desbma/gotify-desktop/actions/workflows/ci.yml/badge.svg)](https://github.com/desbma/gotify-desktop/actions)
 [![AUR version](https://img.shields.io/aur/version/gotify-desktop.svg?style=flat)](https://aur.archlinux.org/packages/gotify-desktop/)
+[![nixpkgs unstable version](https://repology.org/badge/version-for-repo/nix_unstable/gotify-desktop.svg?header=nixpkgs+unstable)](https://search.nixos.org/packages?channel=unstable&show=gotify-desktop&query=gotify-desktop)
 [![License](https://img.shields.io/github/license/desbma/gotify-desktop.svg?style=flat)](https://github.com/desbma/gotify-desktop/blob/master/LICENSE)
 
 Small [Gotify](https://gotify.net/) daemon to receive messages and forward them as desktop notifications.
@@ -72,6 +73,9 @@ Then add to packages in order to install:
     ];
 }
 ```
+### Nixpkgs
+
+Nixos/Nix users can install the latest package from the [unstable branch](https://search.nixos.org/packages?channel=unstable&show=gotify-desktop&query=gotify-desktop).
 
 ## Configuration
 

@@ -22,7 +22,7 @@ pub(crate) struct Config {
 }
 
 /// A token either as a string, or a command to run to get it
-#[derive(Clone, Debug, serde::Deserialize)]
+#[derive(Debug, serde::Deserialize)]
 #[cfg_attr(test, derive(Eq, PartialEq))]
 #[serde(rename_all = "snake_case")]
 pub(crate) enum TokenSource {
@@ -64,7 +64,7 @@ impl TokenSource {
 }
 
 /// Gotify specific local configuration
-#[derive(Clone, Debug, serde::Deserialize)]
+#[derive(Debug, serde::Deserialize)]
 pub(crate) struct GotifyConfig {
     /// Gotify base URL
     pub url: url::Url,
@@ -114,7 +114,7 @@ pub(crate) fn parse(custom_config: Option<String>) -> anyhow::Result<Config> {
 mod tests {
     use super::*;
 
-    #[derive(Debug, serde::Deserialize)]
+    #[derive(serde::Deserialize)]
     struct TestConfig {
         token: TokenSource,
     }

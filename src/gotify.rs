@@ -49,7 +49,7 @@ pub(crate) struct Client {
 }
 
 /// Gotify message
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, serde::Deserialize)]
 pub(crate) struct Message {
     /// Gotify id
     pub id: i64,
@@ -62,35 +62,26 @@ pub(crate) struct Message {
     pub title: String,
     /// Message priority
     pub priority: i64,
-    /// Message date & time
-    pub date: String,
     /// App image filepath
     #[serde(skip)]
     pub app_img_filepath: Option<PathBuf>,
 }
 
 /// Gotify message bunch
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(serde::Deserialize)]
 pub(crate) struct AllMessages {
     /// The actual messages
     messages: Vec<Message>,
 }
 
 /// Gotify app metadata
-#[derive(serde::Serialize, serde::Deserialize)]
+#[cfg_attr(test, derive(Debug, Eq, PartialEq))]
+#[derive(serde::Deserialize)]
 struct AppInfo {
-    /// unused
-    description: String,
     /// App id
     id: i64,
     /// Image URL
     image: String,
-    /// unused
-    internal: bool,
-    /// App name
-    name: String,
-    /// unused
-    token: String,
 }
 
 /// HTTP or HTTPS websocket
@@ -184,11 +175,10 @@ impl Client {
     }
 
     /// Add auth header to request, send it, check status code, and parse JSON response
-    fn send_api_request<T: serde::de::DeserializeOwned>(
-        &self,
-        method: ureq::http::Method,
-        url: &url::Url,
-    ) -> anyhow::Result<T> {
+    fn send_api_request<T>(&self, method: ureq::http::Method, url: &url::Url) -> anyhow::Result<T>
+    where
+        T: serde::de::DeserializeOwned,
+    {
         let json_data = String::from_utf8(self.send_request(method, url)?)?;
         log::trace!("{json_data}");
         Ok(serde_json::from_str(&json_data)?)
@@ -441,6 +431,23 @@ mod tests {
 
     /// Marker env var for the re-executed child of `http_agent_ignores_env_proxy`.
     const PROXY_CHILD_MARKER: &str = "GOTIFY_DESKTOP_TEST_PROXY_CHILD";
+
+    #[test]
+    fn app_info_parses_response_without_token() {
+        // gotify 3 blanks the token when listing applications, so `token` is
+        // absent (json:"token,omitempty") and new fields we ignore are present
+        let json = r#"[
+            {"id":1,"name":"app","description":"","internal":false,"image":"image/abc.png","defaultPriority":0,"createdAt":"2026-01-01T00:00:00Z","lastUsed":null,"sortKey":"a0"}
+        ]"#;
+        let apps: Vec<AppInfo> = serde_json::from_str(json).unwrap();
+        assert_eq!(
+            apps,
+            vec![AppInfo {
+                id: 1,
+                image: "image/abc.png".to_owned(),
+            }]
+        );
+    }
 
     #[test]
     fn http_agent_ignores_env_proxy() {
